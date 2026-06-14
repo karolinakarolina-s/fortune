@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Orákulum Osudu 🔮</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@300;400;600&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  html, body {
+    height: 100%; overflow-x: hidden;
+    background: #0d0e1a;
+  }
+
+  body {
+    min-height: 100vh; min-height: 100dvh;
+    background-image:
+      radial-gradient(ellipse at 20% 10%, rgba(100,50,180,0.18) 0%, transparent 55%),
+      radial-gradient(ellipse at 80% 90%, rgba(180,130,20,0.12) 0%, transparent 55%);
+    font-family: 'Inter', sans-serif;
+    color: #fff;
+    display: flex; flex-direction: column;
+    align-items: center;
+    padding: 16px 16px 32px;
+    overflow-x: hidden;
+  }
+
+  /* ── Stars ── */
+  .stars { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .star {
+    position: absolute; background: #fff; border-radius: 50%;
+    animation: twinkle var(--d) ease-in-out infinite alternate;
+  }
+  @keyframes twinkle { from { opacity: 0.1; } to { opacity: 0.85; } }
+
+  /* ── Layout ── */
+  .container {
+    position: relative; z-index: 1;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 16px; width: 100%; max-width: 480px;
+  }
+
+  /* ── Header ── */
+  .header { text-align: center; padding-top: 4px; }
+  .subtitle {
+    font-size: 10px; font-weight: 600; letter-spacing: 3px;
+    color: #c9a227; text-transform: uppercase; margin-bottom: 6px;
+  }
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.6rem, 8vw, 2.4rem); font-weight: 900;
+    background: linear-gradient(135deg, #fff 0%, #e8d48b 50%, #c9a227 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text; line-height: 1.1; margin-bottom: 4px;
+  }
+  .tagline { font-size: 12px; color: rgba(255,255,255,0.45); font-style: italic; }
+
+  /* ── Wheel area ── */
+  .wheel-area {
+    display: flex; flex-direction: column; align-items: center; gap: 0;
+    width: 100%;
+  }
+
+  .pointer {
+    width: 0; height: 0;
+    border-left: 13px solid transparent;
+    border-right: 13px solid transparent;
+    border-top: 24px solid #c9a227;
+    filter: drop-shadow(0 0 7px rgba(201,162,39,0.95));
+    z-index: 10; position: relative; margin-bottom: -3px;
+  }
+
+  .wheel-wrapper {
+    position: relative;
+    /* size = min(90vw, 340px) */
+    width: min(90vw, 340px);
+    height: min(90vw, 340px);
+  }
+
+  /* Glow ring */
+  .wheel-wrapper::before {
+    content: '';
+    position: absolute; inset: -7px; border-radius: 50%;
+    background: conic-gradient(from 0deg, #c9a227, #7b3fa0, #c9a227, #3a8fa0, #c9a227, #a03a7b, #c9a227);
+    animation: rotateGlow 8s linear infinite;
+    opacity: 0.55; filter: blur(3px);
+  }
+  @keyframes rotateGlow { to { transform: rotate(360deg); } }
+
+  .wheel-wrapper::after {
+    content: '';
+    position: absolute; inset: -3px; border-radius: 50%;
+    background: #0d0e1a; z-index: 1;
+  }
+
+  canvas#wheel {
+    position: relative; z-index: 2;
+    border-radius: 50%;
+    width: 100%; height: 100%;
+    cursor: pointer; touch-action: manipulation;
+    display: block;
+  }
+
+  /* Hub */
+  .hub {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    width: 56px; height: 56px; border-radius: 50%;
+    background: radial-gradient(circle, #1a1030 0%, #0d0e1a 100%);
+    border: 3px solid #c9a227;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 0 18px rgba(201,162,39,0.5), inset 0 0 12px rgba(0,0,0,0.5);
+    cursor: pointer; touch-action: manipulation;
+    transition: transform 0.2s;
+    -webkit-user-select: none; user-select: none;
+  }
+  .hub:active { transform: translate(-50%, -50%) scale(0.93); }
+
+  /* ── Spin button ── */
+  .spin-btn {
+    background: linear-gradient(135deg, #7b3fa0, #4a1570);
+    border: 2px solid rgba(201,162,39,0.5);
+    color: #fff; font-family: 'Playfair Display', serif;
+    font-size: 16px; font-weight: 700;
+    padding: 15px 0; border-radius: 50px;
+    width: 100%; max-width: 300px;
+    cursor: pointer; letter-spacing: 2px;
+    text-transform: uppercase; touch-action: manipulation;
+    box-shadow: 0 0 28px rgba(123,63,160,0.4), 0 4px 18px rgba(0,0,0,0.4);
+    transition: all 0.2s; position: relative; overflow: hidden;
+    -webkit-user-select: none; user-select: none;
+  }
+  .spin-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 0 18px rgba(123,63,160,0.3);
+  }
+  .spin-btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+
+  /* ── Fortune card ── */
+  .fortune-card {
+    width: 100%;
+    background: linear-gradient(135deg, rgba(30,18,50,0.97), rgba(15,10,30,0.97));
+    border: 1px solid rgba(201,162,39,0.4);
+    border-radius: 20px; padding: 22px 20px;
+    text-align: center;
+    box-shadow: 0 0 36px rgba(123,63,160,0.2), inset 0 0 24px rgba(0,0,0,0.3);
+    opacity: 0; transform: translateY(16px) scale(0.96);
+    transition: all 0.55s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: none;
+  }
+  .fortune-card.visible {
+    opacity: 1; transform: translateY(0) scale(1); display: block;
+  }
+
+  .fortune-category {
+    font-size: 10px; font-weight: 600; letter-spacing: 3px;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .fortune-emoji { font-size: 38px; margin-bottom: 10px; display: block; }
+  .fortune-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; font-weight: 700; margin-bottom: 10px; color: #e8d48b;
+  }
+  .fortune-text {
+    font-size: 14px; color: rgba(255,255,255,0.8);
+    line-height: 1.65; font-style: italic;
+  }
+
+  /* ── Particles ── */
+  .particle {
+    position: fixed; pointer-events: none; z-index: 100;
+    width: 6px; height: 6px; border-radius: 50%;
+    animation: particle-fly 1.1s ease-out forwards;
+  }
+  @keyframes particle-fly {
+    0%   { transform: translate(0,0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+  }
+
+  /* ── Flash overlay ── */
+  .flash-overlay {
+    position: fixed; inset: 0; pointer-events: none; z-index: 50;
+    background: radial-gradient(circle at center, rgba(201,162,39,0.15), transparent 70%);
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .flash-overlay.flash { opacity: 1; }
+
+  .instruction {
+    font-size: 12px; color: rgba(255,255,255,0.3); letter-spacing: 1px; text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="stars" id="stars"></div>
+<div class="flash-overlay" id="flash"></div>
+
+<div class="container">
+  <div class="header">
+    <div class="subtitle">✦ Šálek osudu se otevírá ✦</div>
+    <h1>Orákulum Osudu</h1>
+    <p class="tagline">"Co skrývá lógr tvého osudu?"</p>
+  </div>
+
+  <div class="wheel-area">
+    <div class="pointer"></div>
+    <div class="wheel-wrapper">
+      <canvas id="wheel"></canvas>
+      <div class="hub" id="hub">🔮</div>
+    </div>
+  </div>
+
+  <button class="spin-btn" id="spinBtn">✦ Točit osudem ✦</button>
+
+  <div class="fortune-card" id="fortuneCard">
+    <div class="fortune-category" id="fortuneCategory"></div>
+    <span class="fortune-emoji" id="fortuneEmoji"></span>
+    <div class="fortune-title" id="fortuneTitle"></div>
+    <div class="fortune-text" id="fortuneText"></div>
+  </div>
+
+  <p class="instruction">Klepni na kolo nebo tlačítko a zjisti svůj osud</p>
+</div>
+
+<script>
+// ── Stars ──
+const starsEl = document.getElementById('stars');
+for (let i = 0; i < 60; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  const size = Math.random() * 2.5 + 0.5;
+  s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${(Math.random()*3+1.5).toFixed(1)}s`;
+  starsEl.appendChild(s);
+}
+
+// ── Wheel setup (responsive canvas) ──
+const canvas = document.getElementById('wheel');
+const wrapper = canvas.parentElement;
+
+function resizeCanvas() {
+  const size = wrapper.offsetWidth;
+  canvas.width = size;
+  canvas.height = size;
+  drawWheel(currentAngle);
+}
+
+const segments = [
+  { label: '☕ Káva',    color: '#2a1a40', accent: '#c9a227' },
+  { label: '🔮 Mystika', color: '#1a1040', accent: '#a855f7' },
+  { label: '⚡ Energie', color: '#0f2030', accent: '#22d3ee' },
+  { label: '🌙 Osud',   color: '#1e0a30', accent: '#e879f9' },
+  { label: '✨ Magie',  color: '#2a1500', accent: '#f59e0b' },
+  { label: '🃏 Karty',  color: '#1a0a2a', accent: '#34d399' },
+  { label: '💜 Síla',   color: '#0a1a30', accent: '#818cf8' },
+  { label: '🌟 Hvězdy', color: '#1a1020', accent: '#fb923c' },
+];
+
+const fortunes = {
+  '☕ Káva':    [
+    { emoji:'☕', title:'Káva tě volá!', text:'"Dnes potřebuješ třetí šálek. Orákulum vidí budoucnost v kávovém lógru — a ta budoucnost vonní espressem."' },
+    { emoji:'☕', title:'Přestávka na kávu', text:'"Hvězdy říkají: odlož keyboard, vezmi šálek a nech myšlenky volně plynout. Nejlepší nápady přijdou samy."' },
+  ],
+  '🔮 Mystika': [
+    { emoji:'🔮', title:'Tajemství se odhaluje', text:'"Mlha se rozestupuje. To, co hledáš, bylo celou dobu přímo před tebou. Jen ses nedíval(a) správným směrem."' },
+    { emoji:'🔮', title:'Orákulum promlouvá', text:'"Digitální démoni v aplikaci mojelKT jsou slabší, než se zdají. Tvoje síla je větší. Věř instinktům."' },
+  ],
+  '⚡ Energie': [
+    { emoji:'⚡', title:'Bouřka produktivity!', text:'"Dnes je den explorace do šířky. Přepni na divoký režim — výsledky budou překvapivé."' },
+    { emoji:'⚡', title:'Rychlost testování', text:'"Orákulum předpovídá sprint: od 6 storek k 27. Cesta je strmá, ale hvězdy jsou na tvé straně."' },
+  ],
+  '🌙 Osud':   [
+    { emoji:'🌙', title:'Noc přináší jasnost', text:'"Pozdní hodiny v jiné dimenzi nesou dary. Co začalo jako chaos, skončí jako strategie."' },
+    { emoji:'🌙', title:'Měsíc mluví', text:'"Tvůj agilní kruh se otočí v příznivý čas. Scrum Master v tobě ví, kudy vede cesta."' },
+  ],
+  '✨ Magie':  [
+    { emoji:'✨', title:'Kouzlo se děje!', text:'"Dnes se otevírají brány mezi světy. API kouzla budou fungovat na poprvé. Výjimečný den."' },
+    { emoji:'✨', title:'Zlatá hodinka', text:'"Orákulum vidí záblesk geniality přicházet mezi 14:30 a 16:30. Buď připraven(a) zachytit ho."' },
+  ],
+  '🃏 Karty':  [
+    { emoji:'🃏', title:'Karty osudu se točí', text:'"Kartářka v tobě vidí správně. Důvěřuj prvnímu pocitu. Test case, který děláš, odhalí skrytou vadu."' },
+    { emoji:'🃏', title:'Zvířecí karty mluví', text:'"Zvířecí karta dne: Liška 🦊 — chytrost přemáhá hrubou sílu. Explor testuj laterálně."' },
+  ],
+  '💜 Síla':   [
+    { emoji:'💜', title:'Vnitřní síla!', text:'"Pod ochranou nadpozemských mentorek proudí tvými žilami síla. Dnes není nic nemožné."' },
+    { emoji:'💜', title:'Bohyně kódu hovoří', text:'"DevTools odhalily skryté vady v hlubinách systému. Tvoje oko vidí to, co jiní přehlédli."' },
+  ],
+  '🌟 Hvězdy': [
+    { emoji:'🌟', title:'Hvězdy jsou nakloněny!', text:'"Čtyři zrnka agilního osudu jsou zarovnána. Dnešní den bude zaznamenán v kronikách QAffeine."' },
+    { emoji:'🌟', title:'Polední bouře v šálku', text:'"Orákulum z kávového lógru říká: maximální pokrytí celé aplikace je dosažitelné. Věř tomu."' },
+  ],
+};
+
+const segAngle = (2 * Math.PI) / segments.length;
+let currentAngle = 0;
+let spinning = false;
+
+function drawWheel(angle) {
+  const size = canvas.width;
+  const cx = size / 2, cy = size / 2;
+  const r = size / 2 - 2;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, size, size);
+
+  segments.forEach((seg, i) => {
+    const start = angle + i * segAngle;
+    const end = start + segAngle;
+    const mid = start + segAngle / 2;
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.fillStyle = seg.color;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.arc(cx, cy, r, start, end);
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(201,162,39,0.25)';
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.arc(cx, cy, r - 8, start + 0.06, end - 0.06);
+    ctx.strokeStyle = seg.accent;
+    ctx.lineWidth = 4;
+    ctx.globalAlpha = 0.7;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+
+    const fontSize = Math.max(10, Math.round(size * 0.034));
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(mid);
+    ctx.textAlign = 'right';
+    ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = seg.accent;
+    ctx.shadowBlur = 8;
+    ctx.fillText(seg.label, r - 18, fontSize * 0.38);
+    ctx.restore();
+  });
+
+  // Inner vignette
+  const grad = ctx.createRadialGradient(cx, cy, 24, cx, cy, size * 0.18);
+  grad.addColorStop(0, 'rgba(13,14,26,0.9)');
+  grad.addColorStop(1, 'rgba(13,14,26,0)');
+  ctx.beginPath();
+  ctx.arc(cx, cy, size * 0.18, 0, 2 * Math.PI);
+  ctx.fillStyle = grad;
+  ctx.fill();
+}
+
+// Init
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+// Tap / click
+canvas.addEventListener('click', spinWheel);
+canvas.addEventListener('touchend', e => { e.preventDefault(); spinWheel(); }, { passive: false });
+document.getElementById('hub').addEventListener('click', spinWheel);
+document.getElementById('hub').addEventListener('touchend', e => { e.preventDefault(); spinWheel(); }, { passive: false });
+document.getElementById('spinBtn').addEventListener('click', spinWheel);
+
+function spinWheel() {
+  if (spinning) return;
+  spinning = true;
+  document.getElementById('spinBtn').disabled = true;
+  const card = document.getElementById('fortuneCard');
+  card.classList.remove('visible');
+  setTimeout(() => { card.style.display = 'none'; }, 500);
+
+  const extraSpins = (Math.floor(Math.random() * 4) + 5) * 2 * Math.PI;
+  const randomStop = Math.random() * 2 * Math.PI;
+  const totalRotation = extraSpins + randomStop;
+  const duration = 4000 + Math.random() * 1500;
+  const startTime = performance.now();
+  const startAngle = currentAngle;
+
+  function easeOut(t) { return 1 - Math.pow(1 - t, 4); }
+
+  function animate(now) {
+    const t = Math.min((now - startTime) / duration, 1);
+    currentAngle = startAngle + totalRotation * easeOut(t);
+    drawWheel(currentAngle);
+    if (t < 1) { requestAnimationFrame(animate); }
+    else {
+      spinning = false;
+      document.getElementById('spinBtn').disabled = false;
+      showFortune(currentAngle);
+    }
+  }
+  requestAnimationFrame(animate);
+}
+
+function showFortune(angle) {
+  const normalized = (((-angle - Math.PI / 2) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI);
+  const idx = Math.floor(normalized / segAngle) % segments.length;
+  const seg = segments[idx];
+  const fortune = seg.label in fortunes
+    ? fortunes[seg.label][Math.floor(Math.random() * fortunes[seg.label].length)]
+    : { emoji: '🔮', title: 'Osud promlouvá', text: '"Vesmír má pro tebe plán."' };
+
+  const flash = document.getElementById('flash');
+  flash.classList.add('flash');
+  setTimeout(() => flash.classList.remove('flash'), 600);
+
+  spawnParticles(seg.accent);
+
+  const card = document.getElementById('fortuneCard');
+  card.style.display = 'block';
+  card.style.borderColor = seg.accent + '80';
+  document.getElementById('fortuneCategory').textContent = seg.label;
+  document.getElementById('fortuneCategory').style.color = seg.accent;
+  document.getElementById('fortuneEmoji').textContent = fortune.emoji;
+  document.getElementById('fortuneTitle').textContent = fortune.title;
+  document.getElementById('fortuneText').textContent = fortune.text;
+  requestAnimationFrame(() => requestAnimationFrame(() => card.classList.add('visible')));
+
+  // Scroll fortune into view on mobile
+  setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 300);
+}
+
+function spawnParticles(color) {
+  const px = window.innerWidth / 2, py = window.innerHeight * 0.42;
+  for (let i = 0; i < 24; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const a = Math.random() * 2 * Math.PI;
+    const dist = 80 + Math.random() * 160;
+    p.style.cssText = `left:${px}px;top:${py}px;background:${color};box-shadow:0 0 6px ${color};--tx:${Math.cos(a)*dist}px;--ty:${Math.sin(a)*dist}px`;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 1200);
+  }
+}
+</script>
+</body>
+</html>
