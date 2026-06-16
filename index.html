@@ -38,7 +38,7 @@
     <div class="fortune-card" id="fortuneCard">
       <div class="f-cat"  id="fCat"></div>
       <span class="f-emoji" id="fEmoji"></span>
-      <img class="f-img" id="fImg" data-bludistak="bludistak.png" src="bludistak.png" alt="Zlatý bludišťák" />
+      <img class="f-img" id="fImg" data-bludistak="bludistak.png" src="" alt="Zlatý bludišťák" />
       <div class="f-title" id="fTitle"></div>
       <div class="f-text"  id="fText"></div>
     </div>
@@ -314,7 +314,7 @@ function reveal(a) {
 
   if (f.img) {
     emojiEl.textContent  = '';
-    imgEl.src            = f.img;
+    imgEl.src            = imgEl.dataset.bludistak;
     imgEl.style.display  = 'block';
   } else {
     emojiEl.textContent  = f.e;
