@@ -257,6 +257,7 @@ canvas#wheel {
   margin: 10px auto;
   object-fit: contain;
   -webkit-transform: translateZ(0); /* GPU layer — fixes rendering on iOS */
+  transform: translateZ(0);
 }
 
 .f-title {
