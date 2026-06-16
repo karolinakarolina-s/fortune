@@ -250,9 +250,13 @@ canvas#wheel {
 
 .f-img {
   display: none;
-  width: min(180px, 55vw);
-  border-radius: 12px;
-  margin: 8px auto;
+  max-width: min(200px, 60vw);
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  margin: 10px auto;
+  object-fit: contain;
+  -webkit-transform: translateZ(0); /* GPU layer — fixes rendering on iOS */
 }
 
 .f-title {
